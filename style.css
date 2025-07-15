@@ -1,0 +1,130 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    /* Adiciona espaço na parte inferior para a barra de controle fixa */
+    padding-bottom: 80px;
+}
+
+.container {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 1000px;
+    text-align: center;
+    /* Centraliza o container sem flexbox */
+    margin: 2rem auto;
+}
+
+h1 {
+    color: #0056b3;
+}
+
+.controls {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1rem 0;
+    background-color: #ffffff;
+    box-shadow: 0 -4px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    text-align: center;
+}
+
+.controls button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.controls button:hover {
+    background-color: #0056b3;
+}
+
+.controls button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#next-step-btn {
+    /* Este ID ainda é usado pelo JS, mas os estilos foram movidos para a classe .controls button */
+}
+
+.signal-controls-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 5px;
+    margin-bottom: 2rem;
+    border: 1px solid #dee2e6;
+}
+
+.signal-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 200px;
+    margin: 0.5rem;
+}
+
+.signal-control h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.signal-control label {
+    font-size: 14px;
+    margin-bottom: 0.25rem;
+}
+
+.signal-control input[type="range"] {
+    width: 100%;
+}
+
+.plots-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.plot {
+    width: 100%;
+    min-height: 300px;
+}
+
+.description {
+    background-color: #e9ecef;
+    padding: 1rem;
+    border-radius: 5px;
+    text-align: left;
+    border-left: 5px solid #007bff;
+}
+
+.slider-container {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.slider-container label {
+    margin-right: 1rem;
+    font-weight: bold;
+}
+
+input[type="range"] {
+    width: 70%;
+} 
