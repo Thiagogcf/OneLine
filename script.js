@@ -249,7 +249,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const layout = {
                 title: 'FFT Após Filtro por Magnitude',
                 xaxis: { title: 'Frequência (Hz)' },
-                yaxis: { title: 'Magnitude' }
+                yaxis: { title: 'Magnitude' },
+                shapes: [{
+                    type: 'line',
+                    x0: 0,
+                    y0: cutoffMagnitude,
+                    x1: Fs / 2,
+                    y1: cutoffMagnitude,
+                    line: {
+                        color: 'red',
+                        width: 2,
+                        dash: 'dash'
+                    },
+                    name: 'Corte'
+                }]
             };
             
             let plotDiv = document.getElementById('plot-fft-filtered');
