@@ -61,12 +61,12 @@ h1 {
 
 .signal-controls-container {
     display: flex;
-    justify-content: space-around;
+    justify-content: center; /* Mudei para center para melhor alinhamento */
     flex-wrap: wrap;
     background-color: #f8f9fa;
     padding: 1rem;
     border-radius: 5px;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem; /* Reduzi a margem para o botão de adicionar */
     border: 1px solid #dee2e6;
 }
 
@@ -74,8 +74,36 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 200px;
+    min-width: 220px;
     margin: 0.5rem;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    position: relative; /* Para o botão de remover */
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.signal-control .remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    font-weight: bold;
+    line-height: 22px;
+    text-align: center;
+    font-size: 12px;
+    transition: background-color 0.2s;
+}
+
+.signal-control .remove-btn:hover {
+    background: #c0392b;
 }
 
 .signal-control h3 {
@@ -91,6 +119,27 @@ h1 {
 
 .signal-control input[type="range"] {
     width: 100%;
+    cursor: pointer;
+}
+
+.add-signal-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+#add-signal-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#add-signal-btn:hover {
+    background-color: #218838;
 }
 
 .plots-container {

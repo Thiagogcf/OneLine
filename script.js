@@ -1,11 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     const nextStepBtn = document.getElementById('next-step-btn');
+    const addSignalBtn = document.getElementById('add-signal-btn');
     const plotsContainer = document.getElementById('plots-container');
     const description = document.getElementById('description');
     const controlsContainer = document.getElementById('signal-controls-container');
 
     // --- Elementos de Controle ---
-    let freq1Slider, amp1Slider, freq2Slider, amp2Slider;
+    let signalControls = []; // Array para armazenar os controles de cada senoide
     let cutoffSlider; // Declarado no escopo superior
 
     // Parâmetros do Sinal
@@ -15,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const t = Array.from({ length: L }, (_, i) => i * T); // Vetor de tempo
 
     // Sinais (serão definidos dinamicamente)
-    let signal1, signal2, combinedSignal, noisySignal, fftData, frequencies, filteredFftData, filteredSignal;
+    let signals = [];
+    let combinedSignal, noisySignal, fftData, frequencies, filteredFftData, filteredSignal;
 
     let currentStep = 0;
 
@@ -30,60 +32,80 @@ document.addEventListener('DOMContentLoaded', () => {
         identifyAndShowPeaks,
     ];
 
-    function setupControls() {
-        controlsContainer.innerHTML = `
-            <div class="signal-control">
-                <h3>Senoide 1</h3>
-                <label for="freq1">Frequência: <span id="freq1-val">5 Hz</span></label>
-                <input type="range" id="freq1" min="1" max="100" value="5">
-                <label for="amp1">Amplitude: <span id="amp1-val">1.0</span></label>
-                <input type="range" id="amp1" min="0.1" max="2" step="0.1" value="1.0">
-            </div>
-            <div class="signal-control">
-                <h3>Senoide 2</h3>
-                <label for="freq2">Frequência: <span id="freq2-val">50 Hz</span></label>
-                <input type="range" id="freq2" min="1" max="200" value="50">
-                <label for="amp2">Amplitude: <span id="amp2-val">0.5</span></label>
-                <input type="range" id="amp2" min="0.1" max="2" step="0.1" value="0.5">
-            </div>
+    // --- Gerenciamento Dinâmico de Controles ---
+    function addSignalControl(freq = 20, amp = 0.8) {
+        const signalId = signalControls.length + 1;
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'signal-control';
+        controlDiv.dataset.id = signalId;
+
+        controlDiv.innerHTML = `
+            <button class="remove-btn" title="Remover Sinal">-</button>
+            <h3>Senoide ${signalId}</h3>
+            <label for="freq${signalId}">Frequência: <span id="freq${signalId}-val">${freq} Hz</span></label>
+            <input type="range" id="freq${signalId}" min="1" max="200" value="${freq}">
+            <label for="amp${signalId}">Amplitude: <span id="amp${signalId}-val">${amp.toFixed(1)}</span></label>
+            <input type="range" id="amp${signalId}" min="0.1" max="2" step="0.1" value="${amp}">
         `;
+        controlsContainer.appendChild(controlDiv);
 
-        freq1Slider = document.getElementById('freq1');
-        amp1Slider = document.getElementById('amp1');
-        freq2Slider = document.getElementById('freq2');
-        amp2Slider = document.getElementById('amp2');
+        const newControl = {
+            id: signalId,
+            freqSlider: document.getElementById(`freq${signalId}`),
+            ampSlider: document.getElementById(`amp${signalId}`),
+            freqVal: document.getElementById(`freq${signalId}-val`),
+            ampVal: document.getElementById(`amp${signalId}-val`),
+            div: controlDiv
+        };
 
-        const freq1Val = document.getElementById('freq1-val');
-        const amp1Val = document.getElementById('amp1-val');
-        const freq2Val = document.getElementById('freq2-val');
-        const amp2Val = document.getElementById('amp2-val');
+        newControl.freqSlider.addEventListener('input', (e) => {
+            newControl.freqVal.textContent = `${e.target.value} Hz`;
+            resetSimulation();
+        });
+        newControl.ampSlider.addEventListener('input', (e) => {
+            newControl.ampVal.textContent = parseFloat(e.target.value).toFixed(1);
+            resetSimulation();
+        });
+        
+        controlDiv.querySelector('.remove-btn').addEventListener('click', () => {
+            removeSignalControl(signalId);
+        });
 
-        freq1Slider.addEventListener('input', (e) => {
-            freq1Val.textContent = `${e.target.value} Hz`;
-            resetSimulation();
-        });
-        amp1Slider.addEventListener('input', (e) => {
-            amp1Val.textContent = parseFloat(e.target.value).toFixed(1);
-            resetSimulation();
-        });
-        freq2Slider.addEventListener('input', (e) => {
-            freq2Val.textContent = `${e.target.value} Hz`;
-            resetSimulation();
-        });
-        amp2Slider.addEventListener('input', (e) => {
-            amp2Val.textContent = parseFloat(e.target.value).toFixed(1);
-            resetSimulation();
-        });
+        signalControls.push(newControl);
+        updateRemoveButtons();
+        resetSimulation();
     }
+
+    function removeSignalControl(idToRemove) {
+        const controlToRemove = signalControls.find(c => c.id === idToRemove);
+        if (controlToRemove) {
+            controlToRemove.div.remove();
+            signalControls = signalControls.filter(c => c.id !== idToRemove);
+            updateRemoveButtons();
+            resetSimulation();
+        }
+    }
+
+    function updateRemoveButtons() {
+        // Desabilita o botão de remover se houver apenas um sinal
+        const removeButtons = controlsContainer.querySelectorAll('.remove-btn');
+        if (signalControls.length <= 1) {
+            removeButtons.forEach(btn => btn.style.display = 'none');
+        } else {
+            removeButtons.forEach(btn => btn.style.display = 'block');
+        }
+    }
+    
+    addSignalBtn.addEventListener('click', () => addSignalControl());
 
     function resetSimulation() {
         currentStep = 0;
         plotsContainer.innerHTML = '';
         nextStepBtn.disabled = false;
         nextStepBtn.textContent = 'Próximo Passo';
+        addSignalBtn.disabled = false;
         updateDescription('<p>Ajuste os parâmetros das senoides acima e clique em "Próximo Passo" para iniciar a demonstração.</p>');
     }
-
 
     nextStepBtn.addEventListener('click', () => {
         if (currentStep < steps.length) {
@@ -101,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentStep >= steps.length) {
             nextStepBtn.textContent = 'Fim da Demonstração';
             nextStepBtn.disabled = true;
+            addSignalBtn.disabled = true;
         }
     });
 
@@ -115,59 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateDescription(htmlContent) {
         description.innerHTML = htmlContent;
-    }
-
-    // --- Passo 1: Gerar e Mostrar Senoides Iniciais ---
-    function generateAndShowInitialSignals() {
-        const f1 = parseFloat(freq1Slider.value);
-        const amp1 = parseFloat(amp1Slider.value);
-        const f2 = parseFloat(freq2Slider.value);
-        const amp2 = parseFloat(amp2Slider.value);
-
-        signal1 = t.map(time => amp1 * Math.sin(2 * Math.PI * f1 * time));
-        signal2 = t.map(time => amp2 * Math.sin(2 * Math.PI * f2 * time));
-
-        const layout1 = { title: `Senoide 1: ${f1} Hz, Amplitude ${amp1.toFixed(1)}` };
-        const layout2 = { title: `Senoide 2: ${f2} Hz, Amplitude ${amp2.toFixed(1)}` };
-
-        createPlot('plot1', [{ x: t, y: signal1, type: 'scatter', name: 'Senoide 1' }], layout1);
-        createPlot('plot2', [{ x: t, y: signal2, type: 'scatter', name: 'Senoide 2' }], layout2);
-
-        updateDescription(`
-            <p><strong>Passo 1: Geração de Sinais</strong></p>
-            <p>Começamos com duas senoides puras com os parâmetros que você definiu:</p>
-            <ul>
-                <li>Senoide 1: Frequência ${f1} Hz, Amplitude ${amp1.toFixed(1)}</li>
-                <li>Senoide 2: Frequência ${f2} Hz, Amplitude ${amp2.toFixed(1)}</li>
-            </ul>
-        `);
-    }
-
-    // --- Passo 2: Combinar Sinais ---
-    function combineAndShowSignal() {
-        combinedSignal = t.map((_, i) => signal1[i] + signal2[i]);
-
-        const layout = { title: 'Sinais Combinados' };
-        createPlot('plot-combined', [{ x: t, y: combinedSignal, type: 'scatter' }], layout);
-
-        updateDescription(`
-            <p><strong>Passo 2: Soma dos Sinais</strong></p>
-            <p>As duas senoides são somadas para criar um sinal mais complexo. Observe como a forma de onda resultante contém características de ambos os sinais originais.</p>
-        `);
-    }
-
-    // --- Passo 3: Adicionar Ruído ---
-    function addAndShowNoise() {
-        const noise = t.map(() => (Math.random() - 0.5) * 1.5); // Ruído gaussiano simulado
-        noisySignal = combinedSignal.map((sample, i) => sample + noise[i]);
-
-        const layout = { title: 'Sinal Combinado com Ruído' };
-        createPlot('plot-noisy', [{ x: t, y: noisySignal, type: 'scatter' }], layout);
-
-        updateDescription(`
-            <p><strong>Passo 3: Adição de Ruído</strong></p>
-            <p>Adicionamos ruído aleatório ao sinal combinado para simular condições do mundo real, onde os sinais raramente são perfeitamente limpos.</p>
-        `);
     }
 
     // --- Funções Auxiliares de FFT ---
@@ -186,12 +156,64 @@ document.addEventListener('DOMContentLoaded', () => {
         return X;
     }
 
+    // --- Passo 1: Gerar e Mostrar Senoides Iniciais ---
+    function generateAndShowInitialSignals() {
+        signals = []; // Limpa os sinais antigos
+        plotsContainer.innerHTML = ''; // Limpa plots antigos para este passo
+        let descriptionHTML = '<p><strong>Passo 1: Geração de Sinais</strong></p><p>Começamos com as seguintes senoides puras:</p><ul>';
+
+        signalControls.forEach(control => {
+            const f = parseFloat(control.freqSlider.value);
+            const amp = parseFloat(control.ampSlider.value);
+            const signal = t.map(time => amp * Math.sin(2 * Math.PI * f * time));
+            signals.push(signal);
+            
+            const layout = { title: `Senoide ${control.id}: ${f} Hz, Amplitude ${amp.toFixed(1)}` };
+            createPlot(`plot${control.id}`, [{ x: t, y: signal, type: 'scatter', name: `Senoide ${control.id}` }], layout);
+            
+            descriptionHTML += `<li>Senoide ${control.id}: Frequência ${f} Hz, Amplitude ${amp.toFixed(1)}</li>`;
+        });
+
+        descriptionHTML += '</ul>';
+        updateDescription(descriptionHTML);
+    }
+
+    // --- Passo 2: Combinar Sinais ---
+    function combineAndShowSignal() {
+        combinedSignal = new Array(L).fill(0);
+        for (const signal of signals) {
+            for (let i = 0; i < L; i++) {
+                combinedSignal[i] += signal[i];
+            }
+        }
+
+        const layout = { title: 'Sinais Combinados' };
+        createPlot('plot-combined', [{ x: t, y: combinedSignal, type: 'scatter' }], layout);
+
+        updateDescription(`
+            <p><strong>Passo 2: Soma dos Sinais</strong></p>
+            <p>Todas as senoides são somadas para criar um sinal mais complexo. Observe como a forma de onda resultante contém características de todos os sinais originais.</p>
+        `);
+    }
+
+    // --- Passo 3: Adicionar Ruído ---
+    function addAndShowNoise() {
+        const noise = t.map(() => (Math.random() - 0.5) * 1.5); // Ruído gaussiano simulado
+        noisySignal = combinedSignal.map((sample, i) => sample + noise[i]);
+
+        const layout = { title: 'Sinal Combinado com Ruído' };
+        createPlot('plot-noisy', [{ x: t, y: noisySignal, type: 'scatter' }], layout);
+
+        updateDescription(`
+            <p><strong>Passo 3: Adição de Ruído</strong></p>
+            <p>Adicionamos ruído aleatório ao sinal combinado para simular condições do mundo real, onde os sinais raramente são perfeitamente limpos.</p>
+        `);
+    }
+
     // --- Passo 4: Aplicar e Mostrar FFT ---
     function applyAndShowFFT() {
-        // Lê as frequências atuais dos sliders para a descrição
-        const f1 = parseFloat(freq1Slider.value);
-        const f2 = parseFloat(freq2Slider.value);
-
+        const currentFreqs = signalControls.map(c => `${parseFloat(c.freqSlider.value)} Hz`);
+        
         const N = noisySignal.length;
         fftData = fft(noisySignal);
 
@@ -210,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateDescription(`
             <p><strong>Passo 4: Transformada de Fourier (FFT)</strong></p>
-            <p>Aplicamos a Transformada de Fourier para converter o sinal do domínio do tempo para o domínio da frequência. Isso nos permite ver quais frequências compõem o sinal. Os picos devem corresponder às frequências originais (${f1} Hz e ${f2} Hz), mas o ruído adiciona componentes em várias outras frequências.</p>
+            <p>Aplicamos a Transformada de Fourier para converter o sinal do domínio do tempo para o domínio da frequência. Isso nos permite ver quais frequências compõem o sinal. Os picos devem corresponder às frequências originais (${currentFreqs.join(', ')}), mas o ruído adiciona componentes em várias outras frequências.</p>
         `);
     }
 
@@ -310,6 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cutoffSlider) {
             cutoffSlider.disabled = true;
         }
+        addSignalBtn.disabled = true; // Desabilita adicionar mais sinais
 
         updateDescription(`
             <p><strong>Passo 6: Reconstrução do Sinal</strong></p>
@@ -319,9 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Passo 7: Identificar Picos ---
     function identifyAndShowPeaks() {
-        // Lê as frequências atuais dos sliders para a descrição
-        const f1 = parseFloat(freq1Slider.value);
-        const f2 = parseFloat(freq2Slider.value);
+        const originalFreqs = signalControls.map(c => `${parseFloat(c.freqSlider.value)} Hz`);
 
         // Usa os dados da FFT JÁ FILTRADA do passo anterior
         const N = noisySignal.length;
@@ -367,12 +388,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateDescription(`
             <p><strong>Passo 7: Identificação de Frequências</strong></p>
-            <p>Finalmente, analisamos o espectro do sinal <strong>filtrado</strong>. Os picos de magnitude são claramente visíveis, e o ruído foi removido. Os picos identificados foram em <strong>${peakFrequencies.join(' Hz e ')} Hz</strong>, correspondendo às frequências originais (${f1} Hz e ${f2} Hz).</p>
+            <p>Finalmente, analisamos o espectro do sinal <strong>filtrado</strong>. Os picos de magnitude são claramente visíveis, e o ruído foi removido. Os picos identificados foram em <strong>${peakFrequencies.join(' Hz e ')} Hz</strong>, correspondendo aproximadamente às frequências originais (${originalFreqs.join(' Hz, ')}).</p>
             <p><strong>Demonstração Concluída!</strong></p>
         `);
     }
 
     // Inicialização
-    setupControls();
+    addSignalControl(5, 1.0); // Adiciona o primeiro sinal
+    addSignalControl(50, 0.5); // Adiciona o segundo sinal
     resetSimulation();
 }); 
