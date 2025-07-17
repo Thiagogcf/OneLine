@@ -122,6 +122,33 @@ h1 {
     cursor: pointer;
 }
 
+.noise-control {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.noise-control h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.noise-control label {
+    font-size: 14px;
+    margin-bottom: 0.25rem;
+}
+
+.noise-control input[type="range"] {
+    width: 50%; /* Um pouco menor que os outros */
+    cursor: pointer;
+}
+
 .add-signal-container {
     text-align: center;
     margin-bottom: 2rem;

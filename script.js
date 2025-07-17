@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Elementos de Controle ---
     let signalControls = []; // Array para armazenar os controles de cada senoide
     let cutoffSlider; // Declarado no escopo superior
+    let noiseSlider; // Controle para a intensidade do ruído
+    let noiseUpdateListener = null; // Referência para o listener de evento do ruído
 
     // Parâmetros do Sinal
     const Fs = 1000; // Frequência de amostragem
@@ -104,6 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
         nextStepBtn.disabled = false;
         nextStepBtn.textContent = 'Próximo Passo';
         addSignalBtn.disabled = false;
+        
+        // Remove o listener se ele existir de uma simulação anterior
+        if (noiseSlider && noiseUpdateListener) {
+            noiseSlider.removeEventListener('input', noiseUpdateListener);
+            noiseUpdateListener = null;
+        }
+        noiseSlider = null; // Garante que o slider será recriado
+
         updateDescription('<p>Ajuste os parâmetros das senoides acima e clique em "Próximo Passo" para iniciar a demonstração.</p>');
     }
 
@@ -198,20 +208,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Passo 3: Adicionar Ruído ---
     function addAndShowNoise() {
-        const noise = t.map(() => (Math.random() - 0.5) * 1.5); // Ruído gaussiano simulado
-        noisySignal = combinedSignal.map((sample, i) => sample + noise[i]);
+        let plotDiv = document.getElementById('plot-noisy');
+        if (!plotDiv) {
+            plotDiv = createPlot('plot-noisy', [{ x: t, y: [] }], { title: 'Sinal Combinado com Ruído' });
+            
+            // Cria o controle de ruído e o insere logo após o gráfico de ruído
+            const noiseControlDiv = document.createElement('div');
+            noiseControlDiv.className = 'noise-control';
+            noiseControlDiv.innerHTML = `
+                <h3>Controle de Ruído</h3>
+                <label for="noise-slider">Intensidade do Ruído: <span id="noise-val">0.5</span></label>
+                <input type="range" id="noise-slider" min="0" max="2" step="0.1" value="0.5">
+            `;
+            plotDiv.insertAdjacentElement('afterend', noiseControlDiv);
+            noiseSlider = document.getElementById('noise-slider');
+        }
 
-        const layout = { title: 'Sinal Combinado com Ruído' };
-        createPlot('plot-noisy', [{ x: t, y: noisySignal, type: 'scatter' }], layout);
+        const noiseVal = document.getElementById('noise-val');
 
-        updateDescription(`
-            <p><strong>Passo 3: Adição de Ruído</strong></p>
-            <p>Adicionamos ruído aleatório ao sinal combinado para simular condições do mundo real, onde os sinais raramente são perfeitamente limpos.</p>
-        `);
+        // Define a função de atualização em tempo real
+        noiseUpdateListener = () => {
+            const noiseIntensity = parseFloat(noiseSlider.value);
+            noiseVal.textContent = noiseIntensity.toFixed(1);
+            
+            const noise = t.map(() => (Math.random() - 0.5) * noiseIntensity * 2);
+            noisySignal = combinedSignal.map((sample, i) => sample + noise[i]);
+
+            Plotly.react(plotDiv, [{ x: t, y: noisySignal, type: 'scatter' }], { title: 'Sinal Combinado com Ruído' });
+
+            updateDescription(`
+                <p><strong>Passo 3: Adição de Ruído</strong></p>
+                <p>Adicionamos ruído aleatório para simular condições do mundo real. <strong>Ajuste o controle para ver o efeito em tempo real.</strong></p>
+                <p>Intensidade do ruído ajustada para: <strong>${noiseIntensity.toFixed(1)}</strong>.</p>
+            `);
+        };
+
+        noiseSlider.addEventListener('input', noiseUpdateListener);
+        noiseUpdateListener(); // Chama uma vez para o estado inicial
     }
 
     // --- Passo 4: Aplicar e Mostrar FFT ---
     function applyAndShowFFT() {
+        // Desabilita o controle de ruído ao avançar
+        if (noiseSlider) {
+            noiseSlider.disabled = true;
+        }
+
         const currentFreqs = signalControls.map(c => `${parseFloat(c.freqSlider.value)} Hz`);
         
         const N = noisySignal.length;
