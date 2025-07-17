@@ -137,12 +137,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Configuração do Tema do Plotly ---
+    function getPlotlyTheme() {
+        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (isDarkMode) {
+            return {
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#e0e0e0' },
+                xaxis: { 
+                    gridcolor: '#444', 
+                    zerolinecolor: '#666'
+                },
+                yaxis: { 
+                    gridcolor: '#444', 
+                    zerolinecolor: '#666'
+                }
+            };
+        }
+        // Tema Claro (Padrão)
+        return {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: '#333' },
+            xaxis: { 
+                gridcolor: '#eee',
+                zerolinecolor: '#ccc'
+            },
+            yaxis: { 
+                gridcolor: '#eee',
+                zerolinecolor: '#ccc'
+             }
+        };
+    }
+
     function createPlot(divId, data, layout) {
         const plotDiv = document.createElement('div');
         plotDiv.id = divId;
         plotDiv.className = 'plot';
         plotsContainer.appendChild(plotDiv);
-        Plotly.newPlot(divId, data, layout);
+
+        const themeLayout = getPlotlyTheme();
+        const finalLayout = { ...themeLayout, ...layout };
+        
+        Plotly.newPlot(divId, data, finalLayout);
         return plotDiv;
     }
 
@@ -234,7 +272,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const noise = t.map(() => (Math.random() - 0.5) * noiseIntensity * 2);
             noisySignal = combinedSignal.map((sample, i) => sample + noise[i]);
 
-            Plotly.react(plotDiv, [{ x: t, y: noisySignal, type: 'scatter' }], { title: 'Sinal Combinado com Ruído' });
+            const themeLayout = getPlotlyTheme();
+            const finalLayout = { ...themeLayout, title: 'Sinal Combinado com Ruído' };
+
+            Plotly.react(plotDiv, [{ x: t, y: noisySignal, type: 'scatter' }], finalLayout);
 
             updateDescription(`
                 <p><strong>Passo 3: Adição de Ruído</strong></p>
@@ -310,7 +351,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const P1_filtered = magnitude_filtered.slice(0, N / 2 + 1);
             P1_filtered.forEach((val, i) => P1_filtered[i] = i > 0 && i < P1_filtered.length - 1 ? 2 * val : val);
 
-            const layout = {
+            const themeLayout = getPlotlyTheme();
+            const finalLayout = {
+                ...themeLayout,
                 title: 'FFT Após Filtro por Magnitude',
                 xaxis: { title: 'Frequência (Hz)' },
                 yaxis: { title: 'Magnitude' },
@@ -331,9 +374,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let plotDiv = document.getElementById('plot-fft-filtered');
             if (!plotDiv) {
-                plotDiv = createPlot('plot-fft-filtered', [{ x: frequencies, y: P1_filtered, type: 'scatter' }], layout);
+                plotDiv = createPlot('plot-fft-filtered', [{ x: frequencies, y: P1_filtered, type: 'scatter' }], finalLayout);
             } else {
-                Plotly.react(plotDiv, [{ x: frequencies, y: P1_filtered, type: 'scatter' }], layout);
+                Plotly.react(plotDiv, [{ x: frequencies, y: P1_filtered, type: 'scatter' }], finalLayout);
             }
         }
         
@@ -434,6 +477,19 @@ document.addEventListener('DOMContentLoaded', () => {
             <p><strong>Demonstração Concluída!</strong></p>
         `);
     }
+    
+    // --- Atualização Dinâmica do Tema ---
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        // Encontra todos os gráficos e atualiza o layout
+        const allPlots = plotsContainer.querySelectorAll('.plot');
+        allPlots.forEach(plotDiv => {
+            if (plotDiv.id) {
+                const themeLayout = getPlotlyTheme();
+                Plotly.relayout(plotDiv.id, themeLayout);
+            }
+        });
+    });
+
 
     // Inicialização
     addSignalControl(5, 1.0); // Adiciona o primeiro sinal

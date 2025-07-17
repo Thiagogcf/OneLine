@@ -1,26 +1,75 @@
+:root {
+    /* Tema Claro (Padrão) */
+    --bg-color: #f0f2f5;
+    --text-color: #333;
+    --container-bg: #fff;
+    --primary-color: #007bff;
+    --primary-hover: #0056b3;
+    --secondary-color: #28a745;
+    --secondary-hover: #218838;
+    --header-color: #0056b3;
+    --card-bg: #fff;
+    --card-border: #e0e0e0;
+    --card-header-color: #495057;
+    --control-bg: #f8f9fa;
+    --control-border: #dee2e6;
+    --description-bg: #e9ecef;
+    --description-border: #007bff;
+    --button-remove-bg: #e74c3c;
+    --button-remove-hover: #c0392b;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Tema Escuro */
+        --bg-color: #121212;
+        --text-color: #e0e0e0;
+        --container-bg: #1e1e1e;
+        --primary-color: #0d6efd;
+        --primary-hover: #0a58ca;
+        --secondary-color: #198754;
+        --secondary-hover: #146c43;
+        --header-color: #4dabf7;
+        --card-bg: #2c2c2c;
+        --card-border: #444;
+        --card-header-color: #f1f3f5;
+        --control-bg: #252525;
+        --control-border: #3a3a3a;
+        --description-bg: #2c2c2c;
+        --description-border: #0d6efd;
+        --button-remove-bg: #dc3545;
+        --button-remove-hover: #b02a37;
+        --shadow-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f2f5;
-    color: #333;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     margin: 0;
     /* Adiciona espaço na parte inferior para a barra de controle fixa */
     padding-bottom: 80px;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .container {
-    background-color: #fff;
+    background-color: var(--container-bg);
     padding: 2rem;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px var(--shadow-color);
     width: 90%;
     max-width: 1000px;
     text-align: center;
     /* Centraliza o container sem flexbox */
     margin: 2rem auto;
+    transition: background-color 0.3s;
 }
 
 h1 {
-    color: #0056b3;
+    color: var(--header-color);
 }
 
 .controls {
@@ -29,14 +78,15 @@ h1 {
     left: 0;
     width: 100%;
     padding: 1rem 0;
-    background-color: #ffffff;
-    box-shadow: 0 -4px 8px rgba(0,0,0,0.1);
+    background-color: var(--container-bg);
+    box-shadow: 0 -4px 8px var(--shadow-color);
     z-index: 1000;
     text-align: center;
+    transition: background-color 0.3s;
 }
 
 .controls button {
-    background-color: #007bff;
+    background-color: var(--primary-color);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -47,7 +97,7 @@ h1 {
 }
 
 .controls button:hover {
-    background-color: #0056b3;
+    background-color: var(--primary-hover);
 }
 
 .controls button:disabled {
@@ -63,11 +113,12 @@ h1 {
     display: flex;
     justify-content: center; /* Mudei para center para melhor alinhamento */
     flex-wrap: wrap;
-    background-color: #f8f9fa;
+    background-color: var(--control-bg);
     padding: 1rem;
     border-radius: 5px;
     margin-bottom: 1rem; /* Reduzi a margem para o botão de adicionar */
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--control-border);
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .signal-control {
@@ -77,18 +128,19 @@ h1 {
     min-width: 220px;
     margin: 0.5rem;
     padding: 1rem;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--card-border);
     border-radius: 8px;
     position: relative; /* Para o botão de remover */
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 4px var(--shadow-color);
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .signal-control .remove-btn {
     position: absolute;
     top: 5px;
     right: 5px;
-    background: #e74c3c;
+    background: var(--button-remove-bg);
     color: white;
     border: none;
     border-radius: 50%;
@@ -103,13 +155,13 @@ h1 {
 }
 
 .signal-control .remove-btn:hover {
-    background: #c0392b;
+    background: var(--button-remove-hover);
 }
 
 .signal-control h3 {
     margin-top: 0;
     margin-bottom: 0.5rem;
-    color: #495057;
+    color: var(--card-header-color);
 }
 
 .signal-control label {
@@ -123,20 +175,21 @@ h1 {
 }
 
 .noise-control {
-    background-color: #f8f9fa;
+    background-color: var(--control-bg);
     padding: 1rem;
     border-radius: 5px;
     margin-bottom: 1rem;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--control-border);
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .noise-control h3 {
     margin-top: 0;
     margin-bottom: 0.5rem;
-    color: #495057;
+    color: var(--card-header-color);
 }
 
 .noise-control label {
@@ -155,7 +208,7 @@ h1 {
 }
 
 #add-signal-btn {
-    background-color: #28a745;
+    background-color: var(--secondary-color);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -166,7 +219,7 @@ h1 {
 }
 
 #add-signal-btn:hover {
-    background-color: #218838;
+    background-color: var(--secondary-hover);
 }
 
 .plots-container {
@@ -182,18 +235,20 @@ h1 {
 }
 
 .description {
-    background-color: #e9ecef;
+    background-color: var(--description-bg);
     padding: 1rem;
     border-radius: 5px;
     text-align: left;
-    border-left: 5px solid #007bff;
+    border-left: 5px solid var(--description-border);
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .slider-container {
     margin-top: 1rem;
     padding: 1rem;
-    background-color: #f8f9fa;
+    background-color: var(--control-bg);
     border-radius: 5px;
+    transition: background-color 0.3s;
 }
 
 .slider-container label {
