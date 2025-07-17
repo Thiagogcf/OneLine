@@ -258,4 +258,37 @@ h1 {
 
 input[type="range"] {
     width: 70%;
+}
+
+/* Media Queries para Responsividade */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 1rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .signal-controls-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .signal-control {
+        width: 90%;
+        min-width: unset;
+        margin: 0.5rem 0;
+    }
+
+    .noise-control input[type="range"] {
+        width: 80%;
+    }
+
+    .controls button,
+    #add-signal-btn {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
 } 

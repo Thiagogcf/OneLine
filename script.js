@@ -179,8 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const themeLayout = getPlotlyTheme();
         const finalLayout = { ...themeLayout, ...layout };
+        const config = { responsive: true }; // Adiciona a configuração de responsividade
         
-        Plotly.newPlot(divId, data, finalLayout);
+        Plotly.newPlot(divId, data, finalLayout, config); // Passa a configuração para o Plotly
         return plotDiv;
     }
 
